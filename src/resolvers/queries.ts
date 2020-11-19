@@ -1,5 +1,6 @@
 import * as pi from '~/utils/podcastIndex'
 import axios from 'axios'
+import { idToNumber } from '~/utils/id'
 
 export const search = async (_, { query, limit }) => {
   const { feeds } = await pi.query('search/byterm', {
@@ -10,8 +11,7 @@ export const search = async (_, { query, limit }) => {
 }
 
 export const podcast = async (_, { id }) => {
-  const { feed } = await pi.query('podcasts/byfeedid', { id })
-  console.log(feed)
+  const { feed } = await pi.query('podcasts/byfeedid', { id: idToNumber(id) })
   return feed
 }
 

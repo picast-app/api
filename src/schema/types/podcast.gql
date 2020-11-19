@@ -1,5 +1,5 @@
 type Podcast {
-  id: Int!
+  id: ID!
   title: String!
   author: String
   description: String
@@ -9,6 +9,7 @@ type Podcast {
 }
 
 type Episode {
+  id: ID!
   title: String!
   description: String
   publishDate: String
