@@ -1,3 +1,20 @@
+type Query {
+  search(query: String!, limit: Int = 10): [Podcast!]!
+  podcast(id: Int!): Podcast
+  feed(url: String!): Feed
+}
+
+
+schema {
+  query: Query
+}
+
+
+type Feed {
+  raw: String!
+}
+
+
 type Podcast {
   id: Int!
   title: String!

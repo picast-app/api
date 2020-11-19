@@ -13,23 +13,25 @@ export const schema = makeExecutableSchema({
 export const server = new ApolloServer({
   schema,
   debug: !!process.env.IS_OFFLINE,
-  ...(process.env.stage !== 'prod'
-    ? {
-        introspection: true,
-        playground: {
-          endpoint: '/',
-          settings: {
-            'request.credentials': 'same-origin',
-          },
-        },
-      }
-    : { introspection: false, playground: false }),
+  introspection: true,
+  playground: {
+    endpoint: '/',
+    settings: {
+      'request.credentials': 'same-origin',
+      'editor.fontFamily':
+        "'Consolas', 'Inconsolata', 'Droid Sans Mono', 'Monaco', monospace",
+      // @ts-ignore
+      'schema.polling.enable': false,
+    },
+  },
   engine: false,
 })
 
 export const handler = server.createHandler({
   cors: {
-    origin: 'echo.bullinger.dev',
+    origin: process.env.IS_OFFLINE
+      ? 'http://localhost:3000'
+      : 'https://echo.bullinger.dev',
     credentials: true,
   },
 })

@@ -1,3 +1,5 @@
 type Query {
-  search(query: String!): [Podcast!]!
+  search(query: String!, limit: Int = 10): [Podcast!]!
+  podcast(id: Int!): Podcast
+  feed(url: String!): Feed
 }

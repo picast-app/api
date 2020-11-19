@@ -14,7 +14,9 @@
     "eslint:check": "eslint . --ext .ts",
     "eslint:write": "eslint . --ext .ts --fix",
     "lint": "npm run eslint:check && npm run prettier:check",
-    "format": "npm run eslint:write && npm run prettier:write"
+    "format": "npm run eslint:write && npm run prettier:write",
+    "publish:local": "npm run gql:types && npx apollo service:push -v=local-$(whoami)",
+    "gql:types": "node scripts/bundleSchema && npx graphql-codegen"
   },
   "keywords": [],
   "author": "",
@@ -30,9 +32,12 @@
     "@babel/plugin-transform-runtime": "^7.12.1",
     "@babel/preset-env": "^7.12.1",
     "@babel/preset-typescript": "^7.12.1",
+    "@graphql-codegen/cli": "^1.19.1",
+    "@graphql-codegen/typescript": "^1.17.11",
     "@types/node": "^14.14.7",
     "@typescript-eslint/eslint-plugin": "^4.8.0",
     "@typescript-eslint/parser": "^4.8.0",
+    "apollo": "^2.31.1",
     "apollo-server-lambda": "^2.19.0",
     "babel-loader": "^8.2.1",
     "babel-plugin-source-map-support": "^2.1.3",

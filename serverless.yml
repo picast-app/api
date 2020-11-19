@@ -18,9 +18,18 @@ functions:
       - http:
           path: /
           method: post
+          cors:
+            origins:
+              - http://localhost:3000
+              - https://echo.bullinger.dev
+            allowCredentials: true
       - http:
           path: /
           method: get
+          cors:
+            origins:
+              - http://localhost:3000
+              - https://echo.bullinger.dev
 
 plugins:
   - serverless-webpack
