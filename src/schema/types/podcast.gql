@@ -13,4 +13,5 @@ type Episode {
   title: String!
   description: String
   publishDate: String
+  file: String
 }
