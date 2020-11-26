@@ -34,31 +34,53 @@ export const podcast: Query<{ id: string }> = async (_, { id }, ctx, info) => {
     ) as PaginationArgs
 
     validate(args)
-    const { direction, limit, cursor } = flatten(args)
+    const pageOpts = flatten(args)
+    const { direction, limit, cursor: cursorId } = pageOpts
 
-    const [main, { Items }] = await Promise.all([
-      meta(id),
-      ddb
+    const episodes: any[] = []
+    let cursor: { pId: string; eId: string } = cursorId
+      ? {
+          pId: id,
+          eId: cursorId,
+        }
+      : undefined
+
+    const fetchEpisodes = async () => {
+      const { Items, LastEvaluatedKey } = await ddb
         .query({
           TableName: 'echo_episodes',
           KeyConditionExpression: 'pId = :pId ',
           ExpressionAttributeValues: { ':pId': id },
           ScanIndexForward: direction === 'forward',
-          Limit: limit,
+          Limit: limit + 1 - episodes.length,
+          ExclusiveStartKey: cursor,
         })
-        .promise(),
-    ])
+        .promise()
+      episodes.push(...Items)
+      cursor = LastEvaluatedKey as any
+      if (cursor && episodes.length < limit + 1) await fetchEpisodes()
+    }
 
-    logger.info(Items)
+    const [main] = await Promise.all([meta(id), fetchEpisodes()])
+
+    const pageInfo: PageInfo = {
+      total: main.episodeCount,
+      hasPreviousPage:
+        direction === 'forward'
+          ? !!cursorId
+          : episodes.splice(limit).length > 0,
+      hasNextPage:
+        direction === 'backward'
+          ? !!cursorId
+          : episodes.splice(limit).length > 0,
+    }
 
     if (main)
       return {
         ...main,
         episodes: {
-          pageInfo: {
-            total: main.episodeCount,
-          },
-          edges: Items.map(node => ({ node, cursor: node.id })),
+          pageInfo,
+          edges: episodes.map(node => ({ node, cursor: node.eId })),
         },
       }
   }

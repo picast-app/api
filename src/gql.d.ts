@@ -13,4 +13,10 @@ type Resolver<T1 = undefined, T2 = undefined> = (
 
 type Query<T1 = undefined> = Resolver<undefined, T1>
 
-type Fields = { [k: string]: Fields | true }
+type Fields = Record<'string', true | Fields>
+
+type PageInfo = {
+  hasPreviousPage?: boolean
+  hasNextPage?: boolean
+  total?: number
+}
