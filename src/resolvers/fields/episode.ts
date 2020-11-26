@@ -1,4 +1,4 @@
-export const publishDate = ({ datePublished }) =>
-  new Date(datePublished * 1000).toISOString()
+export const publishDate = ({ datePublished, published }) =>
+  new Date((published ?? datePublished) * 1000).toISOString()
 
-export const file = ({ enclosureUrl }) => enclosureUrl
+export const file = ({ enclosureUrl, url }) => url ?? enclosureUrl

@@ -4,3 +4,4 @@ node_modules
 .serverless
 /*credentials*
 gen/
+/report.*
