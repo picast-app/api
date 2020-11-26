@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start:offline": "sls offline --noTimeout",
+    "start:offline": "node --max-old-space-size=4096 node_modules/serverless/bin/serverless offline start --noTimeout",
     "logs": "sls logs -f echo",
     "logs:watch": "sls logs -f echo -t",
     "deploy": "sls deploy",
@@ -26,7 +26,9 @@
     "apollo": "^2.31.1",
     "apollo-server-lambda": "^2.19.0",
     "axios": "^0.21.0",
-    "graphql": "^15.4.0"
+    "chalk": "^4.1.0",
+    "graphql": "^15.4.0",
+    "logger": "0.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",

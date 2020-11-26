@@ -15,6 +15,7 @@ module.exports = {
     module: true,
     process: true,
     require: true,
+    logger: 'readonly',
   },
   rules: {
     'no-restricted-globals': 'off',
