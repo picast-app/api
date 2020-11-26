@@ -2,25 +2,29 @@ import { query } from '~/utils/podcastIndex'
 import { numberToId, idToNumber } from '~/utils/id'
 import { ddb } from '~/utils/aws'
 
-export const episodes = async ({ id }) => {
-  const { Items } = await ddb
-    .query({
-      TableName: 'echo_main',
-      KeyConditionExpression: 'pk = :pk',
-      ExpressionAttributeValues: { ':pk': id },
-      ScanIndexForward: false,
-    })
-    .promise()
+type Parent = {
+  id: string
+  episodeCount: number
+} & Record<string, any>
 
-  if (Items?.length) return Items
+// export const episodes: Resolver<Parent> = async ({ id, episodeCount }) => {
+//   const { Items } = await ddb
+//     .query({
+//       TableName: 'echo_main',
+//       KeyConditionExpression: 'pk = :pk',
+//       ExpressionAttributeValues: { ':pk': id },
+//       ScanIndexForward: false,
+//     })
+//     .promise()
 
-  const { items } = await query('episodes/byfeedid', {
-    id: typeof id === 'number' ? id : idToNumber(id),
-    max: 200,
-  })
-  return items
-}
+//   return {
+//     pageInfo: {
+//       total: episodeCount,
+//     },
+//   }
+// }
 
-export const id = ({ id }) => (typeof id === 'number' ? numberToId(id) : id)
+export const id: Resolver<Parent> = ({ id }) =>
+  typeof id === 'number' ? numberToId(id) : id
 
-export const feed = ({ url, feed }) => feed ?? url
+export const feed: Resolver<Parent> = ({ url, feed }) => feed ?? url

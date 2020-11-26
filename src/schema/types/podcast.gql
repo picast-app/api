@@ -3,15 +3,22 @@ type Podcast {
   title: String!
   author: String
   description: String
-  episodes: [Episode!]!
   artwork: String
   feed: String!
+  episodes(
+    first: Int
+    last: Int
+    before: ID
+    after: ID
+  ): PodcastEpisodeConnection!
 }
 
-type Episode {
-  id: ID!
-  title: String!
-  description: String
-  publishDate: String
-  file: String
+type PodcastEpisodeConnection implements Connection {
+  edges: [PodcastEpisodeEdge!]!
+  pageInfo: PageInfo!
+}
+
+type PodcastEpisodeEdge implements Edge {
+  node: Episode!
+  cursor: ID!
 }

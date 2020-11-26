@@ -1,0 +1,7 @@
+type Episode implements Node {
+  id: ID!
+  title: String!
+  description: String
+  publishDate: String
+  file: String
+}
