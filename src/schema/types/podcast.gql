@@ -10,7 +10,7 @@ type Podcast {
     last: Int
     before: ID
     after: ID
-  ): PodcastEpisodeConnection!
+  ): PodcastEpisodeConnection
 }
 
 type PodcastEpisodeConnection implements Connection {

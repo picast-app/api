@@ -1,7 +1,7 @@
 import * as pi from '~/utils/podcastIndex'
 import axios from 'axios'
 import { idToNumber } from '~/utils/id'
-import { ddb } from '~/utils/aws'
+import { ddb, sns } from '~/utils/aws'
 import * as ast from '~/utils/gqlAst'
 import { flatten, validate, PaginationArgs } from '~/utils/pagination'
 
@@ -63,19 +63,19 @@ export const podcast: Query<{ id: string }> = async (_, { id }, ctx, info) => {
 
     const [main] = await Promise.all([meta(id), fetchEpisodes()])
 
-    const pageInfo: PageInfo = {
-      total: main.episodeCount,
-      hasPreviousPage:
-        direction === 'forward'
-          ? !!cursorId
-          : episodes.splice(limit).length > 0,
-      hasNextPage:
-        direction === 'backward'
-          ? !!cursorId
-          : episodes.splice(limit).length > 0,
-    }
+    if (main) {
+      const pageInfo: PageInfo = {
+        total: main.episodeCount,
+        hasPreviousPage:
+          direction === 'forward'
+            ? !!cursorId
+            : episodes.splice(limit).length > 0,
+        hasNextPage:
+          direction === 'backward'
+            ? !!cursorId
+            : episodes.splice(limit).length > 0,
+      }
 
-    if (main)
       return {
         ...main,
         episodes: {
@@ -83,9 +83,19 @@ export const podcast: Query<{ id: string }> = async (_, { id }, ctx, info) => {
           edges: episodes.map(node => ({ node, cursor: node.eId })),
         },
       }
+    }
   }
 
   const { feed } = await pi.query('podcasts/byfeedid', { id: idToNumber(id) })
+  if (feed?.url && !process.env.IS_OFFLINE)
+    await sns
+      .publish({
+        Message: JSON.stringify({
+          feed: feed.url,
+        }),
+        TopicArn: process.env.PARSER_SNS,
+      })
+      .promise()
   return feed
 }
 

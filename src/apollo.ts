@@ -31,7 +31,7 @@ export const handler = server.createHandler({
   cors: {
     origin: process.env.IS_OFFLINE
       ? 'http://localhost:3000'
-      : 'https://echo.bullinger.dev',
+      : 'https://picast.app',
     credentials: true,
   },
 })

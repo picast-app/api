@@ -8,8 +8,23 @@ provider:
   region: eu-west-1
   apiGateway:
     shouldStartNameWithService: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource:
+        - ${ssm:/echo/ddb/podcasts/arn}
+        - ${ssm:/echo/ddb/episodes/arn}
+    - Effect: 'Allow'
+      Action:
+        - 'sns:Publish'
+      Resource:
+        - ${ssm:/echo/sns/parser/arn}
   environment:
     stage: ${self:provider.stage}
+    PI_API_KEY: ${ssm:/echo/pi/key}
+    PI_API_SECRET: ${ssm:/echo/pi/secret~true}
+    PARSER_SNS: ${ssm:/echo/sns/parser/arn}
 
 functions:
   echo:
@@ -21,7 +36,7 @@ functions:
           cors:
             origins:
               - http://localhost:3000
-              - https://echo.bullinger.dev
+              - https://picast.app
             allowCredentials: true
       - http:
           path: /
@@ -29,7 +44,7 @@ functions:
           cors:
             origins:
               - http://localhost:3000
-              - https://echo.bullinger.dev
+              - https://picast.app
 
 plugins:
   - serverless-webpack
