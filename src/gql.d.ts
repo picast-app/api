@@ -7,11 +7,12 @@ declare module '*.gql' {
 type Resolver<T1 = undefined, T2 = undefined> = (
   parent: T1,
   args: T2,
-  ctx: any,
+  ctx: ResolverCtx,
   info: any
 ) => any
 
 type Query<T1 = undefined> = Resolver<undefined, T1>
+type Mutation<T1 = undefined> = Query<T1>
 
 type Fields = Record<'string', true | Fields>
 

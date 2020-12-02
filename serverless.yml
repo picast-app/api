@@ -25,6 +25,10 @@ provider:
     PI_API_KEY: ${ssm:/echo/pi/key}
     PI_API_SECRET: ${ssm:/echo/pi/secret~true}
     PARSER_SNS: ${ssm:/echo/sns/parser/arn}
+    GOOGLE_ID: ${ssm:/echo/google/id}
+    GOOGLE_SECRET: ${ssm:/echo/google/secret~true}
+    PUBLIC_KEY: ${ssm:/echo/api/PublicKey}
+    PRIVATE_KEY: ${ssm:/echo/api/PrivateKey~true}
 
 functions:
   echo:

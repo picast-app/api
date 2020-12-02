@@ -16,7 +16,8 @@
     "lint": "npm run eslint:check && npm run prettier:check",
     "format": "npm run eslint:write && npm run prettier:write",
     "publish:local": "npm run gql:types && npx apollo service:push -v=local-$(whoami)",
-    "gql:types": "node scripts/bundleSchema && npx graphql-codegen"
+    "gql:types": "node scripts/bundleSchema && npx graphql-codegen",
+    "key:gen": "ssh-keygen -t rsa -P \"\" -b 4096 -m PEM -f jwt.key && openssl rsa -in jwt.key -pubout -outform PEM -out jwt.key.pub"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +29,7 @@
     "axios": "^0.21.0",
     "chalk": "^4.1.0",
     "graphql": "^15.4.0",
+    "jsonwebtoken": "^8.5.1",
     "logger": "0.0.1"
   },
   "devDependencies": {
