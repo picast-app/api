@@ -32,6 +32,7 @@ export const server = new ApolloServer({
       if (cookies.auth) {
         const jwt = decode(cookies.auth)
         ctx.user = jwt.id
+        ctx.auth = jwt.auth
       }
     } catch (jwtError) {
       logger.error("couldn't decode auth cookie", { jwtError, cookies })

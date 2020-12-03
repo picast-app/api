@@ -13,8 +13,8 @@ const [PUBLIC_KEY, PRIVATE_KEY] = (() => {
   ].map(v => v.replace(/\\n/gm, '\n'))
 })()
 
-export const signInToken = (id: string): string =>
-  jwt.sign({ id }, PRIVATE_KEY, {
+export const signInToken = (id: string, authProvider: string): string =>
+  jwt.sign({ id, auth: authProvider }, PRIVATE_KEY, {
     issuer: 'https://api.picast.app',
     subject: id,
     algorithm: 'RS256',
@@ -32,7 +32,7 @@ export const decode = (token: string) => {
   }
 }
 
-export const cookie = (name: string, value: string, age = 60 ** 2 * 24 * 14) =>
+export const cookie = (name: string, value: string, age = 60 ** 2 * 24 * 180) =>
   `${name}=${value}; HttpOnly;${
     !process.env.IS_OFFLINE ? 'Domain=picast.app; Secure;' : ''
   } SameSite=Lax; Max-Age=${age}`

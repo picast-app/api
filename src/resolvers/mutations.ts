@@ -1,23 +1,35 @@
 import { AuthenticationError } from 'apollo-server-lambda'
 import axios from 'axios'
 import { signInToken, cookie } from '~/auth'
+import User from '~/models/user'
 
 export const signInGoogle: Mutation<{ accessToken: string }> = async (
   parent,
   { accessToken },
   { setHeader }
 ) => {
-  const { data } = await axios(
-    'https://www.googleapis.com/oauth2/v3/userinfo',
-    {
-      params: { access_token: accessToken },
-    }
-  )
+  try {
+    const { data } = await axios(
+      'https://www.googleapis.com/oauth2/v3/userinfo',
+      {
+        params: { access_token: accessToken },
+      }
+    )
 
-  if (!data.sub)
-    throw new AuthenticationError("couldn't get user id from google")
+    if (!data.sub)
+      throw new AuthenticationError("couldn't get user id from google")
 
-  const jwt = signInToken(data.sub)
+    const user = await User.signIn(data.sub)
 
-  setHeader('Set-Cookie', cookie('auth', jwt))
+    const jwt = signInToken(user.id, 'google')
+
+    setHeader('Set-Cookie', cookie('auth', jwt))
+
+    return { ...user, authProvider: 'google' }
+  } catch (e) {
+    console.error(e)
+    if (e.response.data.error === 'invalid_request')
+      throw new AuthenticationError('token expired')
+    throw e
+  }
 }

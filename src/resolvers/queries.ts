@@ -4,6 +4,7 @@ import { idToNumber } from '~/utils/id'
 import { ddb, sns } from '~/utils/aws'
 import * as ast from '~/utils/gqlAst'
 import { flatten, validate, PaginationArgs } from '~/utils/pagination'
+import User from '~/models/user'
 
 export const search = async (_, { query, limit }) => {
   const { feeds } = await pi.query('search/byterm', {
@@ -102,4 +103,16 @@ export const podcast: Query<{ id: string }> = async (_, { id }, ctx, info) => {
 export const feed = async (_, { url }) => {
   const { data } = await axios(url)
   return { raw: data }
+}
+
+export const me = async (_, __, { user: userId, auth }) => {
+  if (!userId) return
+
+  const user = await User.fetch(userId)
+  logger.info({ user })
+
+  return {
+    authProvider: auth,
+    ...user,
+  }
 }

@@ -1,0 +1,8 @@
+type User {
+  id: ID!
+  authProvider: AuthProvider!
+}
+
+enum AuthProvider {
+  google
+}
