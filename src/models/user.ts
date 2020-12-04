@@ -4,7 +4,10 @@ import { v4 as uuidv4 } from 'uuid'
 const TableName = 'echo_users'
 
 export default class User {
-  constructor(public readonly id: string) {}
+  constructor(
+    public readonly id: string,
+    public readonly subscriptions: string[] = null
+  ) {}
 
   public static async signIn(id: string): Promise<User | null> {
     const { Item: signIn } = await ddb
@@ -24,14 +27,24 @@ export default class User {
     const { Item: user } = await ddb
       .get({ TableName, Key: { id: `user#${id}` } })
       .promise()
-    logger.info({ user, id })
     if (!user) return null
-    return new User(id)
+    return new User(id, user.subscriptions?.values ?? null)
   }
 
   private static async create(): Promise<User> {
     const id = uuidv4()
     await ddb.put({ TableName, Item: { id: `user#${id}` } }).promise()
     return new User(id)
+  }
+
+  public async subscribe(...ids: string[]) {
+    await ddb
+      .update({
+        TableName,
+        Key: { id: `user#${this.id}` },
+        UpdateExpression: 'ADD subscriptions :pId',
+        ExpressionAttributeValues: { ':pId': ddb.createSet(ids) },
+      })
+      .promise()
   }
 }

@@ -1,11 +1,9 @@
 import { numberToId } from '~/utils/id'
 import { flatten, validate } from '~/utils/pagination'
 import { ddb } from '~/utils/aws'
+import type Podcast from '~/models/podcast'
 
-type Parent = {
-  id: string
-  episodeCount: number
-} & Record<string, any>
+type Parent = Podcast & Record<string, any>
 
 export const id: Resolver<Parent> = ({ id }) =>
   typeof id === 'number' ? numberToId(id) : id
@@ -16,6 +14,8 @@ export const episodes: Resolver<Parent> = async (
   { id, episodeCount },
   args
 ) => {
+  if (typeof id !== 'string') return
+
   validate(args)
   const pageOpts = flatten(args)
   const { direction, limit, cursor: cursorId } = pageOpts

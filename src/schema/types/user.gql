@@ -1,8 +1,14 @@
 type User {
   id: ID!
   authProvider: AuthProvider!
+  subscriptions(known: [ID!]): Subscriptions!
 }
 
 enum AuthProvider {
   google
+}
+
+type Subscriptions {
+  added: [Podcast!]!
+  removed: [ID!]!
 }

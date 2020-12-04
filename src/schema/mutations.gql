@@ -1,3 +1,4 @@
 type Mutation {
   signInGoogle(accessToken: ID!): User!
+  subscribe(podcasts: [ID!]!): Int
 }

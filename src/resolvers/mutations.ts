@@ -4,7 +4,7 @@ import { signInToken, cookie } from '~/auth'
 import User from '~/models/user'
 
 export const signInGoogle: Mutation<{ accessToken: string }> = async (
-  parent,
+  _,
   { accessToken },
   { setHeader }
 ) => {
@@ -32,4 +32,13 @@ export const signInGoogle: Mutation<{ accessToken: string }> = async (
       throw new AuthenticationError('token expired')
     throw e
   }
+}
+
+export const subscribe: Mutation<{ podcasts: string[] }> = async (
+  _,
+  { podcasts },
+  { user }
+) => {
+  if (!user) throw new AuthenticationError('must be logged in')
+  await new User(user).subscribe(...podcasts)
 }
