@@ -47,4 +47,15 @@ export default class User {
       })
       .promise()
   }
+
+  public async unsubscribe(...ids: string[]) {
+    await ddb
+      .update({
+        TableName,
+        Key: { id: `user#${this.id}` },
+        UpdateExpression: 'DELETE subscriptions :pId',
+        ExpressionAttributeValues: { ':pId': ddb.createSet(ids) },
+      })
+      .promise()
+  }
 }

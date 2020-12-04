@@ -42,3 +42,12 @@ export const subscribe: Mutation<{ podcasts: string[] }> = async (
   if (!user) throw new AuthenticationError('must be logged in')
   await new User(user).subscribe(...podcasts)
 }
+
+export const unsubscribe: Mutation<{ podcasts: string[] }> = async (
+  _,
+  { podcasts },
+  { user }
+) => {
+  if (!user) throw new AuthenticationError('must be logged in')
+  await new User(user).unsubscribe(...podcasts)
+}
