@@ -2,8 +2,6 @@ import * as pi from '~/utils/podcastIndex'
 import axios from 'axios'
 import { idToNumber } from '~/utils/id'
 import { ddb, sns } from '~/utils/aws'
-import * as ast from '~/utils/gqlAst'
-import { flatten, validate, PaginationArgs } from '~/utils/pagination'
 import User from '~/models/user'
 
 export const search = async (_, { query, limit }) => {
@@ -21,71 +19,9 @@ async function meta(id: string) {
   return Item
 }
 
-export const podcast: Query<{ id: string }> = async (_, { id }, ctx, info) => {
-  const episodeAST = info.fieldNodes[0].selectionSet.selections.find(
-    ({ kind, name }) => kind === 'Field' && name.value === 'episodes'
-  )
-  if (!episodeAST) {
-    const data = await meta(id)
-    if (data) return data
-  } else {
-    const args = ast.args(
-      episodeAST.arguments,
-      info.variableValues
-    ) as PaginationArgs
-
-    validate(args)
-    const pageOpts = flatten(args)
-    const { direction, limit, cursor: cursorId } = pageOpts
-
-    const episodes: any[] = []
-    let cursor: { pId: string; eId: string } = cursorId
-      ? {
-          pId: id,
-          eId: cursorId,
-        }
-      : undefined
-
-    const fetchEpisodes = async () => {
-      const { Items, LastEvaluatedKey } = await ddb
-        .query({
-          TableName: 'echo_episodes',
-          KeyConditionExpression: 'pId = :pId ',
-          ExpressionAttributeValues: { ':pId': id },
-          ScanIndexForward: direction === 'forward',
-          Limit: limit + 1 - episodes.length,
-          ExclusiveStartKey: cursor,
-        })
-        .promise()
-      episodes.push(...Items)
-      cursor = LastEvaluatedKey as any
-      if (cursor && episodes.length < limit + 1) await fetchEpisodes()
-    }
-
-    const [main] = await Promise.all([meta(id), fetchEpisodes()])
-
-    if (main) {
-      const pageInfo: PageInfo = {
-        total: main.episodeCount,
-        hasPreviousPage:
-          direction === 'forward'
-            ? !!cursorId
-            : episodes.splice(limit).length > 0,
-        hasNextPage:
-          direction === 'backward'
-            ? !!cursorId
-            : episodes.splice(limit).length > 0,
-      }
-
-      return {
-        ...main,
-        episodes: {
-          pageInfo,
-          edges: episodes.map(node => ({ node, cursor: node.eId })),
-        },
-      }
-    }
-  }
+export const podcast: Query<{ id: string }> = async (_, { id }) => {
+  const podcast = await meta(id)
+  if (podcast) return podcast
 
   const { feed } = await pi.query('podcasts/byfeedid', { id: idToNumber(id) })
   if (feed?.url && !process.env.IS_OFFLINE)
@@ -103,16 +39,4 @@ export const podcast: Query<{ id: string }> = async (_, { id }, ctx, info) => {
 export const feed = async (_, { url }) => {
   const { data } = await axios(url)
   return { raw: data }
-}
-
-export const me = async (_, __, { user: userId, auth }) => {
-  if (!userId) return
-
-  const user = await User.fetch(userId)
-  logger.info({ user })
-
-  return {
-    authProvider: auth,
-    ...user,
-  }
 }

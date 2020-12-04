@@ -8,7 +8,7 @@ export const requests: Record<string, any> = {}
 
 export const schema = makeExecutableSchema({
   typeDefs: Object.values(typeDefs),
-  resolvers,
+  resolvers: resolvers as any,
   inheritResolversFromInterfaces: true,
 })
 
