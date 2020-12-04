@@ -25,7 +25,7 @@ export const signInGoogle: Mutation<{ accessToken: string }> = async (
 
     setHeader('Set-Cookie', cookie('auth', jwt))
 
-    return { ...user, authProvider: 'google' }
+    return { user, ...user, authProvider: 'google' }
   } catch (e) {
     console.error(e)
     if (e.response.data.error === 'invalid_request')
