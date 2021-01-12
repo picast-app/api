@@ -15,6 +15,7 @@ provider:
       Resource:
         - ${ssm:/echo/ddb/podcasts/arn}
         - ${ssm:/echo/ddb/episodes/arn}
+        - ${ssm:/echo/ddb/users/arn}
     - Effect: 'Allow'
       Action:
         - 'sns:Publish'
@@ -29,6 +30,7 @@ provider:
     GOOGLE_SECRET: ${ssm:/echo/google/secret~true}
     PUBLIC_KEY: ${ssm:/echo/api/PublicKey}
     PRIVATE_KEY: ${ssm:/echo/api/PrivateKey~true}
+    PHOTON_URL: ${ssm:/echo/photon/url}
 
 functions:
   echo:
@@ -58,6 +60,7 @@ custom:
   serverless-offline:
     httpPort: 7000
     noPrependStageInUrl: true
+    useChildProcesses: true
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'npm'

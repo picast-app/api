@@ -7,7 +7,7 @@ export const subscriptions: Resolver<
 > = async ({ user }, { known }) => {
   return {
     added: await Podcast.fetchAll(
-      ...user.subscriptions.filter(id => !known?.includes(id))
+      ...(user.subscriptions?.filter(id => !known?.includes(id)) ?? [])
     ),
     removed: known?.filter(id => !user.subscriptions?.includes(id)) ?? [],
   }

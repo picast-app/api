@@ -4,6 +4,7 @@ type Podcast {
   author: String
   description: String
   artwork: String
+  covers: [String!]
   feed: String!
   episodes(
     first: Int

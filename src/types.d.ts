@@ -7,3 +7,5 @@ type ResolverCtx = {
   setHeader(name: string, value: string): void
   signOut(): void
 }
+
+type PromiseType<T> = T extends PromiseLike<infer K> ? K : T
