@@ -3,4 +3,10 @@ type Query {
   podcast(id: ID!): Podcast
   feed(url: String!): Feed
   me: User
+  metaCheck(podcasts: [CheckSum!]!): [Podcast!]!
+}
+
+input CheckSum {
+  id: ID!
+  check: ID!
 }

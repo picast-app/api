@@ -46,3 +46,7 @@ export const me = async (_, __, { user: userId, auth }) => {
     ...user,
   }
 }
+
+export const metaCheck: Query<{
+  podcasts: { id: string; check: string }[]
+}> = async (_, { podcasts }) => await Podcast.fetchDiff(podcasts)

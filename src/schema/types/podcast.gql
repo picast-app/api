@@ -6,6 +6,7 @@ type Podcast {
   artwork: String
   covers: [String!]
   feed: String!
+  check: String
   episodes(
     first: Int
     last: Int
