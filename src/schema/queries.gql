@@ -1,6 +1,7 @@
 type Query {
   search(query: String!, limit: Int = 10): [Podcast!]!
   podcast(id: ID!): Podcast
+  episode(podId: ID!, epId: ID!): Episode
   feed(url: String!): Feed
   me: User
   metaCheck(podcasts: [CheckSum!]!): [Podcast!]!
