@@ -49,9 +49,9 @@ export const episodes: Resolver<Parent> = async (
   const pageInfo: PageInfo = {
     total: episodeCount,
     hasPreviousPage:
-      direction === 'forward' ? !!cursorId : episodes.splice(limit).length > 0,
-    hasNextPage:
       direction === 'backward' ? !!cursorId : episodes.splice(limit).length > 0,
+    hasNextPage:
+      direction === 'forward' ? !!cursorId : episodes.splice(limit).length > 0,
   }
 
   return {
