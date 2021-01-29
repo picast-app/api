@@ -58,9 +58,11 @@ plugins:
 
 custom:
   serverless-offline:
-    httpPort: 7000
+    port: 7000
     noPrependStageInUrl: true
-    useChildProcesses: true
+    useWorkerThreads: true
+    skipCacheInvalidation: true
+    allowCache: false
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'npm'
