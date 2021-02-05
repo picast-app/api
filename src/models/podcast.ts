@@ -1,8 +1,4 @@
-import { ddb } from '~/utils/aws'
-import { batch } from '~/utils/array'
 import * as db from '~/utils/db'
-
-const TableName = 'echo_podcasts'
 
 export default class Podcast {
   private constructor(
@@ -23,20 +19,8 @@ export default class Podcast {
 
   public static async fetchAll(...ids: string[]): Promise<Podcast[]> {
     if (!ids.length) return []
-
-    const batches = await Promise.all(
-      batch(ids, 100).map(ids =>
-        ddb
-          .batchGet({
-            RequestItems: { [TableName]: { Keys: ids.map(id => ({ id })) } },
-          })
-          .promise()
-      )
-    )
-
-    return batches
-      .flatMap(batch => batch.Responses[TableName])
-      .map(data => Podcast.fromDB(data as any))
+    const podcasts = await db.podcasts.batchGet(...ids)
+    return podcasts.map(data => Podcast.fromDB(data))
   }
 
   public static async fetchDiff(podcasts: { id: string; check: string }[]) {
@@ -58,7 +42,7 @@ export default class Podcast {
       data.title,
       data.feed,
       data.artwork,
-      data.art,
+      data.covers,
       data.episodeCount,
       data.description,
       (data as any).check

@@ -21,7 +21,11 @@ export const podcast: Query<{ id: string }> = async (_, { id }) => {
   const { feed } = await pi.query('podcasts/byfeedid', { id: idToNumber(id) })
   if (feed?.url)
     if (process.env.IS_OFFLINE)
-      await axios.post('http://localhost:9000/parse', { feed: feed.url })
+      try {
+        await axios.post('http://localhost:9000/parse', { feed: feed.url })
+      } catch (e) {
+        logger.warn(e)
+      }
     else
       await sns
         .publish({
