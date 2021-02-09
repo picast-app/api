@@ -1,61 +1,39 @@
-import { ddb } from '~/utils/aws'
+import * as db from '~/utils/db'
 import { v4 as uuidv4 } from 'uuid'
-
-const TableName = 'echo_users'
 
 export default class User {
   constructor(
     public readonly id: string,
-    public readonly subscriptions: string[] = null
+    public readonly subscriptions: string[] | null = null
   ) {}
 
   public static async signIn(id: string): Promise<User | null> {
-    const { Item: signIn } = await ddb
-      .get({ TableName, Key: { id: `sign#${id}` } })
-      .promise()
+    const signIn = await db.users.get(`sign#${id}`)
 
     if (signIn) return await User.fetch(signIn.user)
 
     const user = await User.create()
-    await ddb
-      .put({ TableName, Item: { id: `sign#${id}`, user: user.id } })
-      .promise()
+    await db.users.put({ id: `sign#${id}`, user: user.id })
     return user
   }
 
   public static async fetch(id: string): Promise<User | null> {
-    const { Item: user } = await ddb
-      .get({ TableName, Key: { id: `user#${id}` } })
-      .promise()
+    const user = await db.users.get(`user#${id}`)
     if (!user) return null
-    return new User(id, user.subscriptions?.values ?? null)
+    return new User(id, user.subscriptions ?? null)
   }
 
   private static async create(): Promise<User> {
     const id = uuidv4()
-    await ddb.put({ TableName, Item: { id: `user#${id}` } }).promise()
+    await db.users.put({ id: `user#${id}` })
     return new User(id)
   }
 
   public async subscribe(...ids: string[]) {
-    await ddb
-      .update({
-        TableName,
-        Key: { id: `user#${this.id}` },
-        UpdateExpression: 'ADD subscriptions :pId',
-        ExpressionAttributeValues: { ':pId': ddb.createSet(ids) },
-      })
-      .promise()
+    await db.users.update(`user#${this.id}`).add({ subscriptions: ids })
   }
 
   public async unsubscribe(...ids: string[]) {
-    await ddb
-      .update({
-        TableName,
-        Key: { id: `user#${this.id}` },
-        UpdateExpression: 'DELETE subscriptions :pId',
-        ExpressionAttributeValues: { ':pId': ddb.createSet(ids) },
-      })
-      .promise()
+    await db.users.update(`user#${this.id}`).delete({ subscriptions: ids })
   }
 }
