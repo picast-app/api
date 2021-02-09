@@ -2,6 +2,7 @@ import { AuthenticationError } from 'apollo-server-lambda'
 import axios from 'axios'
 import { signInToken, cookie } from '~/auth'
 import User from '~/models/user'
+import { sns } from '~/utils/aws'
 
 export const signInGoogle: Mutation<{ accessToken: string }> = async (
   _,
@@ -50,4 +51,13 @@ export const unsubscribe: Mutation<{ podcasts: string[] }> = async (
 ) => {
   if (!user) throw new AuthenticationError('must be logged in')
   await new User(user).unsubscribe(...podcasts)
+}
+
+export const parse: Mutation<{ id: string }> = async (_, { id }) => {
+  await sns
+    .publish({
+      Message: JSON.stringify({ id }),
+      TopicArn: process.env.PARSER_SNS,
+    })
+    .promise()
 }

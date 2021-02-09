@@ -9,5 +9,5 @@ type Query {
 
 input CheckSum {
   id: ID!
-  check: ID!
+  check: ID
 }
