@@ -21,6 +21,10 @@ provider:
         - 'sns:Publish'
       Resource:
         - ${ssm:/echo/sns/parser/arn}
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: '*'
   environment:
     stage: ${self:provider.stage}
     PI_API_KEY: ${ssm:/echo/pi/key}

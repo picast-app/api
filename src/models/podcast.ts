@@ -1,4 +1,6 @@
 import * as db from '~/utils/db'
+import { PaginationArgs, flatten } from '~/utils/pagination'
+import { ddb } from '~/utils/aws'
 
 export default class Podcast {
   private constructor(
@@ -33,6 +35,53 @@ export default class Podcast {
         .filter(v => podcasts.find(({ id }) => id === v.id).check !== v.check)
         .map(({ id }) => id)
     )
+  }
+
+  public static async fetchEpisodes(
+    id: string,
+    opts: PaginationArgs
+  ): Promise<[episodes: any[], pageInfo: Omit<PageInfo, 'episodeCount'>]> {
+    const pageOpts = flatten(opts)
+    const { direction, limit, cursor: cursorId } = pageOpts
+
+    const episodes: any[] = []
+    let cursor: { pId: string; eId: string } = cursorId
+      ? {
+          pId: id,
+          eId: cursorId,
+        }
+      : undefined
+
+    const fetch = async () => {
+      const { Items, LastEvaluatedKey } = await ddb
+        .query({
+          TableName: 'echo_episodes',
+          KeyConditionExpression: 'pId = :pId ',
+          ExpressionAttributeValues: { ':pId': id },
+          ScanIndexForward: direction === 'forward',
+          Limit: limit + 1 - episodes.length,
+          ExclusiveStartKey: cursor,
+        })
+        .promise()
+      episodes.push(...Items)
+      cursor = LastEvaluatedKey as any
+      if (cursor && episodes.length < limit + 1) await fetch()
+    }
+
+    await fetch()
+
+    const pageInfo: PageInfo = {
+      hasPreviousPage:
+        direction === 'backward'
+          ? !!cursorId
+          : episodes.splice(limit).length > 0,
+      hasNextPage:
+        direction === 'forward'
+          ? !!cursorId
+          : episodes.splice(limit).length > 0,
+    }
+
+    return [episodes, pageInfo]
   }
 
   private static fromDB(data: PromiseType<ReturnType<typeof db.podcasts.get>>) {

@@ -2,12 +2,12 @@ import { UserInputError } from 'apollo-server-lambda'
 
 export type ForwardPageOpt = {
   first: number
-  after: string
+  after?: string
 }
 
 export type BackwardPageOpt = {
   last: number
-  before: string
+  before?: string
 }
 
 type PaginationDir = 'forward' | 'backward'

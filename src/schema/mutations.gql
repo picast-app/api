@@ -3,4 +3,5 @@ type Mutation {
   subscribe(podcasts: [ID!]!): Int
   unsubscribe(podcasts: [ID!]!): Int
   parse(id: ID!): Int
+  deletePodcast(id: ID!): Int
 }
