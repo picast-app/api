@@ -1,5 +1,6 @@
 import User from '~/models/user'
 import Podcast from '~/models/podcast'
+import { wsToken } from '~/auth'
 
 export const subscriptions: Resolver<
   { user: User },
@@ -12,3 +13,5 @@ export const subscriptions: Resolver<
     removed: known?.filter(id => !user.subscriptions?.includes(id)) ?? [],
   }
 }
+
+export const wsAuth: Resolver<User, string> = ({ id }) => wsToken(id)

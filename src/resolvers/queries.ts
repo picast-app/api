@@ -51,8 +51,8 @@ export const feed = async (_, { url }) => {
 
 export const me = async (_, __, { user: userId, auth }) => {
   if (!userId) return
-
   const user = await User.fetch(userId)
+  if (!user) return
 
   return {
     user,

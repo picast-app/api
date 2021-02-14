@@ -84,6 +84,8 @@ export const deletePodcast: Mutation<{ id: string }> = async (_, { id }) => {
   logger.info(`${Contents.length} images`)
 
   await Promise.all(
-    Contents.map(({ Key }) => s3.deleteObject({ Bucket: 'picast-imgs', Key }))
+    Contents.map(({ Key }) =>
+      s3.deleteObject({ Bucket: 'picast-imgs', Key }).promise()
+    )
   )
 }

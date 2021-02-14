@@ -13,13 +13,19 @@ const [PUBLIC_KEY, PRIVATE_KEY] = (() => {
   ].map(v => v.replace(/\\n/gm, '\n'))
 })()
 
-export const signInToken = (id: string, authProvider: string): string =>
-  jwt.sign({ id, auth: authProvider }, PRIVATE_KEY, {
+const jwtOpts = (subject: string, expiresIn: string) =>
+  ({
     issuer: 'https://api.picast.app',
-    subject: id,
+    subject,
     algorithm: 'RS256',
-    expiresIn: '180d',
-  })
+    expiresIn,
+  } as const)
+
+export const signInToken = (id: string, authProvider: string): string =>
+  jwt.sign({ id, auth: authProvider }, PRIVATE_KEY, jwtOpts(id, '180d'))
+
+export const wsToken = (id: string): string =>
+  jwt.sign({ wsUser: id }, PRIVATE_KEY, jwtOpts(id, '48h'))
 
 export const decode = (token: string) => {
   if (!token) return
