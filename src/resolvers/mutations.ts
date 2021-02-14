@@ -44,7 +44,10 @@ export const subscribe: Mutation<{ podcasts: string[] }> = async (
   { user }
 ) => {
   if (!user) throw new AuthenticationError('must be logged in')
-  await new User(user).subscribe(...podcasts)
+  await Promise.all([
+    new User(user).subscribe(...podcasts),
+    ...podcasts.map(id => Podcast.addSubscriber(id, user)),
+  ])
 }
 
 export const unsubscribe: Mutation<{ podcasts: string[] }> = async (
@@ -53,7 +56,10 @@ export const unsubscribe: Mutation<{ podcasts: string[] }> = async (
   { user }
 ) => {
   if (!user) throw new AuthenticationError('must be logged in')
-  await new User(user).unsubscribe(...podcasts)
+  await Promise.all([
+    new User(user).unsubscribe(...podcasts),
+    ...podcasts.map(id => Podcast.removeSubscriber(id, user)),
+  ])
 }
 
 export const parse: Mutation<{ id: string }> = async (_, { id }) => {

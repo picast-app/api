@@ -1,10 +1,10 @@
 import * as pi from '~/utils/podcastIndex'
-import axios from 'axios'
 import { idToNumber } from '~/utils/id'
-import { sns } from '~/utils/aws'
 import User from '~/models/user'
 import Podcast from '~/models/podcast'
 import * as db from '~/utils/db'
+import { parse } from '~/utils/parser'
+import axios from 'axios'
 
 export const search = async (_, { query, limit }) => {
   const { feeds } = await pi.query('search/byterm', {
@@ -19,22 +19,7 @@ export const podcast: Query<{ id: string }> = async (_, { id }) => {
   if (podcast) return podcast
 
   const { feed } = await pi.query('podcasts/byfeedid', { id: idToNumber(id) })
-  if (feed?.url)
-    if (process.env.IS_OFFLINE)
-      try {
-        await axios.post('http://localhost:9000/parse', { feed: feed.url })
-      } catch (e) {
-        logger.warn(e)
-      }
-    else
-      await sns
-        .publish({
-          Message: JSON.stringify({
-            feed: feed.url,
-          }),
-          TopicArn: process.env.PARSER_SNS,
-        })
-        .promise()
+  if (feed?.url) await parse(feed.url)
 
   return feed
 }

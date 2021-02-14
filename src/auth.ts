@@ -33,8 +33,7 @@ export const decode = (token: string) => {
     return jwt.verify(token, PUBLIC_KEY) as any
   } catch (e) {
     logger.error(e)
-    if (e instanceof jwt.JsonWebTokenError) return
-    throw e
+    if (!(e instanceof jwt.JsonWebTokenError)) throw e
   }
 }
 

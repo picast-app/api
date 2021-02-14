@@ -84,6 +84,16 @@ export default class Podcast {
     return [episodes, pageInfo]
   }
 
+  public static async addSubscriber(podcast: string, user: string) {
+    await db.podsubs.update(`podcast#${podcast}`).add({ subscribers: [user] })
+  }
+
+  public static async removeSubscriber(podcast: string, user: string) {
+    await db.podsubs
+      .update(`podcast#${podcast}`)
+      .delete({ subscribers: [user] })
+  }
+
   private static fromDB(data: PromiseType<ReturnType<typeof db.podcasts.get>>) {
     if (!data) return
     return new Podcast(
