@@ -53,6 +53,20 @@ export default class Podcast {
     }))
   }
 
+  public static async episodeDiff(id: string, known: string[]) {
+    const { episodes } = await db.parser.get(`${id}#parser`)
+    const added = episodes
+      .filter(id => !known.includes(id))
+      .map(eId => [id, eId] as [string, string])
+    const removed = known.filter(id => !episodes.includes(id))
+
+    return {
+      podcast: id,
+      removed,
+      added: await db.episodes.batchGet(...added),
+    }
+  }
+
   public static async fetchEpisodes(
     id: string,
     opts: PaginationArgs

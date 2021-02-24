@@ -6,3 +6,9 @@ type Episode implements Node {
   file: String
   duration: Int
 }
+
+type EpisodeDiff {
+  podcast: ID!
+  added: [Episode!]
+  removed: [ID!]
+}

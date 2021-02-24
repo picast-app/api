@@ -5,6 +5,7 @@ import Podcast from '~/models/podcast'
 import * as db from '~/utils/db'
 import { parse } from '~/utils/parser'
 import axios from 'axios'
+import { episodes } from '@picast-app/db'
 
 export const search = async (_, { query, limit }) => {
   const { feeds } = await pi.query('search/byterm', {
@@ -49,3 +50,12 @@ export const me = async (_, __, { user: userId, auth }) => {
 export const metaCheck: Query<{
   podcasts: { id: string; meta: string; episodes: string }[]
 }> = async (_, { podcasts }) => await Podcast.fetchDiff(podcasts)
+
+export const episodeDiff: Query<{
+  podcasts: { id: string; known: string }[]
+}> = async (_, { podcasts }) =>
+  await Promise.all(
+    podcasts.map(({ id, known }) =>
+      Podcast.episodeDiff(id, episodes.decodeIds(known))
+    )
+  )

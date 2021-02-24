@@ -5,10 +5,16 @@ type Query {
   feed(url: String!): Feed
   me: User
   metaCheck(podcasts: [CheckSum!]!): [PodcastCheckResult!]!
+  episodeDiff(podcasts: [EpisodeEnc!]!): [EpisodeDiff!]!
 }
 
 input CheckSum {
   id: ID!
   meta: ID
   episodes: ID
+}
+
+input EpisodeEnc {
+  id: ID!
+  known: ID!
 }
