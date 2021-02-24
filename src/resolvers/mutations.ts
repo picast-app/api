@@ -3,8 +3,8 @@ import axios from 'axios'
 import { signInToken, cookie } from '~/auth'
 import Podcast from '~/models/podcast'
 import User from '~/models/user'
-import { sns } from '~/utils/aws'
 import { S3 } from 'aws-sdk'
+import { parse as triggerParse } from '~/utils/parser'
 import * as db from '~/utils/db'
 
 export const signInGoogle: Mutation<{ accessToken: string }> = async (
@@ -62,14 +62,8 @@ export const unsubscribe: Mutation<{ podcasts: string[] }> = async (
   ])
 }
 
-export const parse: Mutation<{ id: string }> = async (_, { id }) => {
-  await sns
-    .publish({
-      Message: JSON.stringify({ id }),
-      TopicArn: process.env.PARSER_SNS,
-    })
-    .promise()
-}
+export const parse: Mutation<{ id: string }> = async (_, { id }) =>
+  await triggerParse({ id })
 
 export const deletePodcast: Mutation<{ id: string }> = async (_, { id }) => {
   logger.info(`delete podcast ${id}`)
