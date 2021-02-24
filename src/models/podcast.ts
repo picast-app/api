@@ -25,16 +25,32 @@ export default class Podcast {
     return podcasts.map(data => Podcast.fromDB(data))
   }
 
-  public static async fetchDiff(podcasts: { id: string; check: string }[]) {
-    const items = await db.podcasts
+  public static async fetchDiff(
+    podcasts: { id: string; meta: string; episodes: string }[]
+  ) {
+    const selected = await db.podcasts
       .batchGet(...podcasts.map(({ id }) => id))
-      .select('id', 'check')
+      .select('id', 'check', 'episodeCheck')
 
-    return Podcast.fetchAll(
-      ...items
-        .filter(v => podcasts.find(({ id }) => id === v.id).check !== v.check)
-        .map(({ id }) => id)
-    )
+    const metaDiff = podcasts
+      .filter(
+        ({ id, meta }) =>
+          meta && selected.find(v => v.id === id)!.check !== meta
+      )
+      .map(({ id }) => id)
+
+    const updatedMeta = metaDiff.length
+      ? await Podcast.fetchAll(...metaDiff)
+      : []
+
+    return podcasts.map(({ id, meta, episodes }) => ({
+      id,
+      ...(meta && { podcast: updatedMeta.find(v => v.id === id) }),
+      ...(episodes && {
+        episodesMatch:
+          selected.find(v => v.id === id).episodeCheck === episodes,
+      }),
+    }))
   }
 
   public static async fetchEpisodes(

@@ -24,3 +24,9 @@ type PodcastEpisodeEdge implements Edge {
   node: Episode!
   cursor: ID!
 }
+
+type PodcastCheckResult {
+  id: ID!
+  podcast: Podcast
+  episodesMatch: Boolean
+}
