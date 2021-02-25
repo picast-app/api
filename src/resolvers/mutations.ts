@@ -38,6 +38,10 @@ export const signInGoogle: Mutation<{ accessToken: string }> = async (
   }
 }
 
+export const signOut: Mutation = (_, __, { setHeader }) => {
+  setHeader('Set-Cookie', cookie('auth', 'deleted', -1))
+}
+
 export const subscribe: Mutation<{ podcasts: string[] }> = async (
   _,
   { podcasts },
