@@ -15,3 +15,12 @@ export const subscriptions: Resolver<
 }
 
 export const wsAuth: Resolver<User, string> = ({ id }) => wsToken(id)
+
+export const currentEpisode: Resolver<{ user: User }> = async ({ user }) =>
+  user.current && {
+    id: {
+      podcast: user.current.podcast,
+      episode: user.current.episode,
+      position: user.current.position,
+    },
+  }

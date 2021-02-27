@@ -1,10 +1,12 @@
 import * as db from '~/utils/db'
+import type { DBRecord } from 'ddbjs'
 import { v4 as uuidv4 } from 'uuid'
 
 export default class User {
   constructor(
     public readonly id: string,
-    public readonly subscriptions: string[] | null = null
+    public readonly subscriptions: string[] | null = null,
+    public readonly current?: DBRecord<typeof db['users']>['current']
   ) {}
 
   public static async signIn(id: string): Promise<User | null> {
@@ -20,7 +22,7 @@ export default class User {
   public static async fetch(id: string): Promise<User | null> {
     const user = await db.users.get(`user#${id}`)
     if (!user) return null
-    return new User(id, user.subscriptions ?? null)
+    return new User(id, user.subscriptions ?? null, user.current)
   }
 
   private static async create(): Promise<User> {

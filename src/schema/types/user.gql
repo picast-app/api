@@ -3,6 +3,7 @@ type User {
   authProvider: AuthProvider!
   subscriptions(known: [ID!]): Subscriptions!
   wsAuth: ID
+  currentEpisode: EpisodePlayback
 }
 
 enum AuthProvider {

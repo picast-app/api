@@ -12,3 +12,13 @@ type EpisodeDiff {
   added: [Episode!]
   removed: [ID!]
 }
+
+type EpisodeId {
+  podcast: ID!
+  episode: ID!
+}
+
+type EpisodePlayback {
+  id: EpisodeId!
+  position: Int
+}
