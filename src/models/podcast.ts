@@ -6,6 +6,7 @@ export default class Podcast {
   private constructor(
     public readonly id: string,
     public readonly title: string,
+    public readonly author: string,
     public readonly feed: string,
     public readonly artwork: string,
     public readonly covers: readonly string[],
@@ -129,6 +130,7 @@ export default class Podcast {
     return new Podcast(
       data.id,
       data.title,
+      data.author,
       data.feed,
       data.artwork,
       data.covers,

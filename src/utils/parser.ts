@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { sns } from '~/utils/aws'
 
-export const parse = async (msg: { feed: string } | { id: string }) => {
+export const parse = async (msg: { id: string; feed: string }) => {
   if (process.env.IS_OFFLINE)
     try {
       await axios.post('http://localhost:9000/parse', msg, {
@@ -10,11 +10,13 @@ export const parse = async (msg: { feed: string } | { id: string }) => {
     } catch (e) {
       logger.warn(e)
     }
-  else
+  else {
+    logger.info(`schedule parse for ${msg.id} (${msg.feed})`)
     await sns
       .publish({
         Message: JSON.stringify(msg),
         TopicArn: process.env.PARSER_SNS,
       })
       .promise()
+  }
 }

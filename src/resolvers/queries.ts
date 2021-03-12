@@ -20,7 +20,7 @@ export const podcast: Query<{ id: string }> = async (_, { id }) => {
   if (podcast) return podcast
 
   const { feed } = await pi.query('podcasts/byfeedid', { id: idToNumber(id) })
-  if (feed?.url) await parse({ feed: feed.url })
+  if (feed?.url) await parse({ id, feed: feed.url })
 
   return feed
 }

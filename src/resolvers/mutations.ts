@@ -66,8 +66,10 @@ export const unsubscribe: Mutation<{ podcasts: string[] }> = async (
   ])
 }
 
-export const parse: Mutation<{ id: string }> = async (_, { id }) =>
-  await triggerParse({ id })
+export const parse: Mutation<{ id: string }> = async (_, { id }) => {
+  const { feed } = await db.podcasts.get(id)
+  await triggerParse({ id, feed })
+}
 
 export const deletePodcast: Mutation<{ id: string }> = async (_, { id }) => {
   logger.info(`delete podcast ${id}`)
@@ -75,6 +77,7 @@ export const deletePodcast: Mutation<{ id: string }> = async (_, { id }) => {
   logger.info(`${episodes.length} episodes`)
 
   await db.podcasts.delete(id)
+  await db.parser.delete(`${id}#parser`)
   await db.episodes.batchDelete(
     ...episodes.map(({ pId, eId }) => [pId, eId] as [string, string])
   )
