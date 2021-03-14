@@ -1,6 +1,13 @@
 import initDB from '@picast-app/db'
 
-export const { podcasts, episodes, users, podsubs, parser } = initDB(
+export const {
+  podcasts,
+  episodes,
+  users,
+  podsubs,
+  parser,
+  notifications,
+} = initDB(
   process.env.IS_OFFLINE
     ? {
         region: 'localhost',

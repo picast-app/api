@@ -47,7 +47,7 @@ export const subscribe: Mutation<{ podcasts: string[] }> = async (
   { podcasts },
   { user }
 ) => {
-  if (!user) throw new AuthenticationError('must be logged in')
+  if (!user) throw new AuthenticationError('must be signed in')
   await Promise.all([
     new User(user).subscribe(...podcasts),
     ...podcasts.map(id => Podcast.addSubscriber(id, user)),
@@ -59,7 +59,7 @@ export const unsubscribe: Mutation<{ podcasts: string[] }> = async (
   { podcasts },
   { user }
 ) => {
-  if (!user) throw new AuthenticationError('must be logged in')
+  if (!user) throw new AuthenticationError('must be signed in')
   await Promise.all([
     new User(user).unsubscribe(...podcasts),
     ...podcasts.map(id => Podcast.removeSubscriber(id, user)),
@@ -95,4 +95,26 @@ export const deletePodcast: Mutation<{ id: string }> = async (_, { id }) => {
       s3.deleteObject({ Bucket: 'picast-imgs', Key }).promise()
     )
   )
+}
+
+export const addWPSub: Mutation<{ sub: string }> = async (
+  _,
+  { sub },
+  { user }
+) => {
+  if (!user) throw new AuthenticationError('must be signed in')
+  const { auth } = JSON.parse(sub)?.keys
+  if (typeof auth !== 'string' || !auth) throw Error('invalid token')
+  await db.notifications.put({ pk: `user#wp#${user}`, sk: auth, sub })
+}
+
+export const removeWPSub: Mutation<{ sub: string }> = async (
+  _,
+  { sub },
+  { user }
+) => {
+  if (!user) throw new AuthenticationError('must be signed in')
+  const { auth } = JSON.parse(sub)?.keys
+  if (typeof auth !== 'string' || !auth) throw Error('invalid token')
+  await db.notifications.delete(`user#wp#${user}`, auth)
 }

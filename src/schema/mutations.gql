@@ -5,4 +5,6 @@ type Mutation {
   unsubscribe(podcasts: [ID!]!): Int
   parse(id: ID!): Int
   deletePodcast(id: ID!): Int
+  addWPSub(sub: ID!): Int
+  removeWPSub(sub: ID!): Int
 }
