@@ -7,4 +7,6 @@ type Mutation {
   deletePodcast(id: ID!): Int
   addWPSub(sub: ID!): Int
   removeWPSub(sub: ID!): Int
+  enableEpisodeNotifications(podcast: ID!): Int
+  disableEpisodeNotifications(podcast: ID!): Int
 }

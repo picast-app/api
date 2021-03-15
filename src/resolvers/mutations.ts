@@ -127,3 +127,25 @@ export const removeWPSub: Mutation<{ sub: string }> = async (
   await db.notifications.delete(`user#wp#${user}`, auth)
   deleteCookie('wp_id')
 }
+
+export const enableEpisodeNotifications: Mutation<{ podcast: string }> = async (
+  _,
+  { podcast },
+  { user }
+) => {
+  if (!user) throw new AuthenticationError('must be signed in')
+  await Promise.all([
+    db.podsubs.update(`podcast#${podcast}`).add({ wpSubs: [user] }),
+    new User(user).addWPSub(podcast),
+  ])
+}
+
+export const disableEpisodeNotifications: Mutation<{
+  podcast: string
+}> = async (_, { podcast }, { user }) => {
+  if (!user) throw new AuthenticationError('must be signed in')
+  await Promise.all([
+    db.podsubs.update(`podcast#${podcast}`).delete({ wpSubs: [user] }),
+    new User(user).removeWPSub(podcast),
+  ])
+}
