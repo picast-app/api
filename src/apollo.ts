@@ -4,7 +4,10 @@ import * as typeDefs from './schema'
 import { decode, cookie } from '~/auth'
 import { parseCookies, Headers } from '~/utils/http'
 
-export const requests: Record<string, any> = {}
+export const requests: Record<
+  string,
+  { responseHeaders?: Record<string, string[]> }
+> = {}
 
 export const schema = makeExecutableSchema({
   typeDefs: Object.values(typeDefs),
@@ -23,9 +26,20 @@ export const server = new ApolloServer({
 
     const ctx: ResolverCtx = {
       setHeader(header, value) {
-        requests[requestId].responseHeaders[header] = value
+        ;(requests[requestId].responseHeaders[header] ??= []).push(value)
       },
-      signOut,
+      setCookie(key, value, age) {
+        ;(requests[requestId].responseHeaders['Set-Cookie'] ??= []).push(
+          cookie(key, value, age)
+        )
+      },
+      deleteCookie(key) {
+        ;(requests[requestId].responseHeaders['Set-Cookie'] ??= []).push(
+          cookie(key, 'deleted', -1)
+        )
+        if (key === 'auth') delete ctx.user
+      },
+      cookies,
     }
 
     try {
@@ -36,16 +50,7 @@ export const server = new ApolloServer({
       }
     } catch (jwtError) {
       logger.error("couldn't decode auth cookie", { jwtError, cookies })
-      signOut()
-    }
-
-    function signOut() {
-      requests[requestId].responseHeaders['Set-Cookie'] = cookie(
-        'auth',
-        'deleted',
-        -1
-      )
-      delete ctx.user
+      ctx.deleteCookie('auth')
     }
 
     return ctx

@@ -1,5 +1,5 @@
 type Mutation {
-  signInGoogle(accessToken: ID!): User!
+  signInGoogle(accessToken: ID!, wpSub: ID): User!
   signOut: Int
   subscribe(podcasts: [ID!]!): Int
   unsubscribe(podcasts: [ID!]!): Int

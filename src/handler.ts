@@ -8,10 +8,7 @@ export const echo = async (event: APIGatewayEvent, context: Context) => {
 
   const [error, data] = await new Promise(res =>
     handler(event, context, (error, body) => {
-      body.headers = {
-        ...body.headers,
-        ...requests[context.awsRequestId].responseHeaders,
-      }
+      body.multiValueHeaders = requests[context.awsRequestId].responseHeaders
       res([error, body])
     })
   )
