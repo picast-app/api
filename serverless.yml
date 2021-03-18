@@ -16,6 +16,7 @@ provider:
         - ${ssm:/echo/ddb/podcasts/arn}
         - ${ssm:/echo/ddb/episodes/arn}
         - ${ssm:/echo/ddb/users/arn}
+        - ${ssm:/echo/ddb/notifications/arn}
     - Effect: 'Allow'
       Action:
         - 'sns:Publish'

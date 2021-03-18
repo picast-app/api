@@ -10,6 +10,7 @@ export default class Podcast {
     public readonly feed: string,
     public readonly artwork: string,
     public readonly covers: readonly string[],
+    public readonly palette: any,
     public readonly episodeCount: number,
     public readonly description: string,
     public readonly check: string
@@ -134,6 +135,7 @@ export default class Podcast {
       data.feed,
       data.artwork,
       data.covers,
+      data.palette,
       data.episodeCount,
       data.description,
       (data as any).check

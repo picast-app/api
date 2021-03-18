@@ -5,6 +5,7 @@ type Podcast {
   description: String
   artwork: String
   covers: [String!]
+  palette: Palette
   feed: String!
   check: String
   episodes(
@@ -29,4 +30,13 @@ type PodcastCheckResult {
   id: ID!
   podcast: Podcast
   episodesMatch: Boolean
+}
+
+type Palette {
+  vibrant: String
+  darkVibrant: String
+  lightVibrant: String
+  muted: String
+  darkMuted: String
+  lightMuted: String
 }
