@@ -6,6 +6,7 @@ import * as db from '~/utils/db'
 import { parse } from '~/utils/parser'
 import axios from 'axios'
 import { episodes } from '@picast-app/db'
+import { UserInputError } from 'apollo-server-errors'
 
 export const search = async (_, { query, limit }) => {
   const { feeds } = await pi.query('search/byterm', {
@@ -16,11 +17,14 @@ export const search = async (_, { query, limit }) => {
 }
 
 export const podcast: Query<{ id: string }> = async (_, { id }) => {
+  if (/[^\w]/.test(id)) throw new UserInputError(`invalid id ${id}`)
+
   const podcast = await Podcast.fetch(id)
   if (podcast) return podcast
 
   const { feed } = await pi.query('podcasts/byfeedid', { id: idToNumber(id) })
   if (feed?.url) await parse({ id, feed: feed.url })
+  else throw new UserInputError(`unknown id ${id}`)
 
   return feed
 }
