@@ -22,6 +22,7 @@ provider:
         - 'sns:Publish'
       Resource:
         - ${ssm:/echo/sns/parser/arn}
+        - ${ssm:/echo/sns/resize/arn}
     - Effect: Allow
       Action:
         - s3:*
@@ -31,6 +32,7 @@ provider:
     PI_API_KEY: ${ssm:/echo/pi/key}
     PI_API_SECRET: ${ssm:/echo/pi/secret~true}
     PARSER_SNS: ${ssm:/echo/sns/parser/arn}
+    RESIZE_SNS: ${ssm:/echo/sns/resize/arn}
     PARSER_AUTH: ${ssm:/parser/auth~true}
     GOOGLE_ID: ${ssm:/echo/google/id}
     GOOGLE_SECRET: ${ssm:/echo/google/secret~true}

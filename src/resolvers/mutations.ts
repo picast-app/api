@@ -1,4 +1,4 @@
-import { AuthenticationError } from 'apollo-server-lambda'
+import { AuthenticationError, UserInputError } from 'apollo-server-lambda'
 import axios from 'axios'
 import { signInToken } from '~/auth'
 import Podcast from '~/models/podcast'
@@ -6,6 +6,7 @@ import User from '~/models/user'
 import { S3 } from 'aws-sdk'
 import { parse as triggerParse } from '~/utils/parser'
 import * as db from '~/utils/db'
+import { sns } from '~/utils/aws'
 
 export const signInGoogle: Mutation<{
   accessToken: string
@@ -148,4 +149,18 @@ export const disableEpisodeNotifications: Mutation<{
     db.podsubs.update(`podcast#${podcast}`).delete({ wpSubs: [user] }),
     new User(user).removeWPSub(podcast),
   ])
+}
+
+export const processCover: Mutation<{ podcast: string }> = async (
+  _,
+  { podcast }
+) => {
+  const data = await db.podcasts.get(podcast)
+  if (!data) throw new UserInputError(`unknown podcast ${podcast}`)
+  await sns
+    .publish({
+      Message: JSON.stringify({ podcast, url: data.artwork }),
+      TopicArn: process.env.RESIZE_SNS,
+    })
+    .promise()
 }

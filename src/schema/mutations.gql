@@ -9,4 +9,5 @@ type Mutation {
   removeWPSub(sub: ID!): Int
   enableEpisodeNotifications(podcast: ID!): Int
   disableEpisodeNotifications(podcast: ID!): Int
+  processCover(podcast: ID!): Int
 }
