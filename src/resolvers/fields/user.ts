@@ -21,6 +21,6 @@ export const currentEpisode: Resolver<{ user: User }> = async ({ user }) =>
     id: {
       podcast: user.current.podcast,
       episode: user.current.episode,
-      position: user.current.position,
     },
+    position: Math.floor(user.current.position),
   }
