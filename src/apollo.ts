@@ -67,6 +67,10 @@ export const server = new ApolloServer({
     },
   },
   engine: false,
+  formatError(err) {
+    logger.error(err)
+    return err
+  },
 })
 
 export const handler = server.createHandler({

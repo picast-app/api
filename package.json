@@ -24,7 +24,7 @@
   "license": "ISC",
   "dependencies": {
     "@babel/runtime": "^7.12.5",
-    "@picast-app/db": "^2.7.2",
+    "@picast-app/db": "^2.11.0",
     "apollo": "^2.31.1",
     "apollo-server-lambda": "^2.19.0",
     "axios": "^0.21.1",
@@ -32,6 +32,7 @@
     "graphql": "^15.4.0",
     "jsonwebtoken": "^8.5.1",
     "logger": "0.0.1",
+    "source-map-support": "^0.5.19",
     "uuid": "^8.3.1"
   },
   "devDependencies": {
@@ -58,7 +59,6 @@
     "serverless": "^2.11.1",
     "serverless-offline": "5.12.0",
     "serverless-webpack": "^5.3.5",
-    "source-map-support": "^0.5.19",
     "ts-loader": "^8.0.11",
     "typescript": "^4.0.5",
     "webpack": "^5.4.0",

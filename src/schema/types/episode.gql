@@ -5,6 +5,7 @@ type Episode implements Node {
   publishDate: String
   file: String
   duration: Int
+  shownotes: String
 }
 
 type EpisodeDiff {
