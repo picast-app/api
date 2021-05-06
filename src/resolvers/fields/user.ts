@@ -1,6 +1,6 @@
 import User from '~/models/user'
 import Podcast from '~/models/podcast'
-import { wsToken } from '~/auth'
+import * as jwt from '~/auth/jwt'
 
 export const subscriptions: Resolver<
   { user: User },
@@ -14,7 +14,8 @@ export const subscriptions: Resolver<
   }
 }
 
-export const wsAuth: Resolver<User, string> = ({ id }) => wsToken(id)
+export const wsAuth: Resolver<User, string> = ({ id }) =>
+  jwt.sign({ wsUser: id }, '48h')
 
 export const currentEpisode: Resolver<{ user: User }> = async ({ user }) =>
   user.current && {

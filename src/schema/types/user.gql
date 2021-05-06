@@ -1,14 +1,9 @@
 type User {
   id: ID!
-  authProvider: AuthProvider!
   subscriptions(known: [ID!]): Subscriptions!
   wpSubs: [ID!]!
   wsAuth: ID
   currentEpisode: EpisodePlayback
-}
-
-enum AuthProvider {
-  google
 }
 
 type Subscriptions {

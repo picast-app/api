@@ -1,6 +1,6 @@
 import { AuthenticationError, UserInputError } from 'apollo-server-lambda'
 import axios from 'axios'
-import { signInToken } from '~/auth'
+import * as jwt from '~/auth/jwt'
 import Podcast from '~/models/podcast'
 import User from '~/models/user'
 import { S3 } from 'aws-sdk'
@@ -24,9 +24,9 @@ export const signInGoogle: Mutation<{
       throw new AuthenticationError("couldn't get user id from google")
 
     const user = await User.signIn(data.sub)
-    const jwt = signInToken(user.id, 'google')
-    setCookie('auth', jwt)
-    if (wpSub) setCookie('wp_id', await storeWPSub(user.id, wpSub))
+
+    setCookie('auth', jwt.sign({ sub: user.id }, '180d'), '180d')
+    if (wpSub) setCookie('wp_id', await storeWPSub(user.id, wpSub), '180d')
 
     return { user, ...user, authProvider: 'google' }
   } catch (e) {
@@ -107,7 +107,7 @@ export const addWPSub: Mutation<{ sub: string }> = async (
   _,
   { sub },
   { user, setCookie }
-) => setCookie('wp_id', await storeWPSub(user, sub))
+) => setCookie('wp_id', await storeWPSub(user, sub), '180d')
 
 async function storeWPSub(user: string, sub: string): Promise<string> {
   if (!user) throw new AuthenticationError('must be signed in')

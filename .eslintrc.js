@@ -16,6 +16,7 @@ module.exports = {
     process: true,
     require: true,
     logger: 'readonly',
+    jest: true,
   },
   rules: {
     'no-restricted-globals': 'off',
