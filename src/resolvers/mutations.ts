@@ -157,10 +157,12 @@ export const processCover: Mutation<{ podcast: string }> = async (
 ) => {
   const data = await db.podcasts.get(podcast)
   if (!data) throw new UserInputError(`unknown podcast ${podcast}`)
-  await sns
-    .publish({
-      Message: JSON.stringify({ podcast, url: data.artwork }),
-      TopicArn: process.env.RESIZE_SNS,
-    })
-    .promise()
+  await sns().resize.send({ podcast, url: data.artwork })
+}
+
+export const passwordTest: Mutation<{
+  user: string
+  password: string
+}> = async (_, { user, password }) => {
+  User.setPassword(user, password)
 }

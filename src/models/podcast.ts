@@ -1,6 +1,5 @@
 import * as db from '~/utils/db'
 import { PaginationArgs, flatten } from '~/utils/pagination'
-import { ddb } from '~/utils/aws'
 
 export default class Podcast {
   private constructor(
@@ -85,7 +84,7 @@ export default class Podcast {
       : undefined
 
     const fetch = async () => {
-      const { Items, LastEvaluatedKey } = await ddb
+      const { Items, LastEvaluatedKey } = await db.podcasts.client
         .query({
           TableName: 'echo_episodes',
           KeyConditionExpression: 'pId = :pId ',

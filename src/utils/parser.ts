@@ -12,11 +12,6 @@ export const parse = async (msg: { id: string; feed: string }) => {
     }
   else {
     logger.info(`schedule parse for ${msg.id} (${msg.feed})`)
-    await sns
-      .publish({
-        Message: JSON.stringify(msg),
-        TopicArn: process.env.PARSER_SNS,
-      })
-      .promise()
+    await sns().parser.send(msg)
   }
 }
