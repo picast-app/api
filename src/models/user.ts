@@ -1,6 +1,8 @@
 import * as db from '~/utils/db'
 import type { DBRecord } from 'ddbjs'
-import { v4 as uuidv4 } from 'uuid'
+import { lambda } from '~/utils/aws'
+import crypto from 'crypto'
+import * as jwt from '~/auth/jwt'
 
 export default class User {
   constructor(
@@ -10,26 +12,97 @@ export default class User {
     public readonly current?: DBRecord<typeof db['users']>['current']
   ) {}
 
-  public static async signIn(id: string): Promise<User | null> {
-    const signIn = await db.users.get(`sign#${id}`)
+  public static async signInPassword(
+    ident: string,
+    password: string
+  ): Promise<User | string> {
+    try {
+      const result = (await lambda().password.invoke({
+        method: 'check',
+        key: ident,
+        password,
+      })) as any
+      if ('errorType' in result) throw result
+      if (result.correct === true && result.id)
+        return await User.fetch(result.id)
+      return 'incorrect_auth'
+    } catch (err) {
+      if (err.errorType === 'KeyError') return 'unknown_ident'
+      logger.error('error during signin', { err })
+      throw Error(err?.errorType)
+    }
+  }
 
-    if (signIn) return await User.fetch(signIn.user)
+  public static async signUpPassword(
+    ident: string,
+    password: string
+  ): Promise<User | string> {
+    if (password?.length < 8) return 'password too short'
+    const id = User.genID()
+    try {
+      const result = (await lambda().password.invoke({
+        method: 'set',
+        key: ident,
+        password,
+        id,
+      })) as any
+      if (typeof result === 'object' && 'errorType' in result) throw result
+    } catch (err) {
+      if (err.errorType === 'ConditionError') return 'duplicate_ident'
+      logger.error('error during signup', { err })
+      throw Error(err?.errorType)
+    }
+    return await User.create(id)
+  }
 
+  public static async signInGoogle(googleID: string): Promise<User> {
+    const userID = await User.getGoogleSignIn(googleID)
+    if (userID) return this.fetch(userID)
     const user = await User.create()
-    await db.users.put({ id: `sign#${id}`, user: user.id })
+    await User.putGoogleSignIn(googleID, user.id)
     return user
+  }
+
+  public static async create(id = User.genID()): Promise<User> {
+    await db.users.put({ id: `user#${id}` })
+    return new User(id)
+  }
+
+  public static async setPassword(user: string, password: string) {
+    await lambda().password.invoke({
+      method: 'set',
+      user,
+      password,
+    })
+  }
+
+  private static async getGoogleSignIn(
+    googleID: string
+  ): Promise<string | null> {
+    const res = await db.podcasts.client
+      .get({ TableName: 'echo_passwords', Key: { key: `google#${googleID}` } })
+      .promise()
+    return res?.Item?.id ?? null
+  }
+
+  private static async putGoogleSignIn(googleID: string, userID: string) {
+    if (!googleID || !userID) throw Error('must provide google & user id')
+    const key = `google#${googleID}`
+    await db.podcasts.client
+      .put({
+        TableName: 'echo_passwords',
+        Item: { key, id: userID },
+        ConditionExpression: '#key <> :key',
+        ExpressionAttributeNames: { '#key': 'key' },
+        ExpressionAttributeValues: { ':key': key },
+      })
+      .promise()
   }
 
   public static async fetch(id: string): Promise<User | null> {
     const user = await db.users.get(`user#${id}`)
     if (!user) return null
     return new User(id, user.subscriptions ?? null, user.wpSubs, user.current)
-  }
-
-  private static async create(): Promise<User> {
-    const id = uuidv4()
-    await db.users.put({ id: `user#${id}` })
-    return new User(id)
   }
 
   public async subscribe(...ids: string[]) {
@@ -47,4 +120,27 @@ export default class User {
   public async removeWPSub(id: string) {
     await db.users.update(`user#${this.id}`).delete({ wpSubs: [id] })
   }
+
+  public async afterSignIn(
+    setCookie: ResolverCtx['setCookie'],
+    wpSub?: string
+  ) {
+    setCookie('auth', jwt.sign({ sub: this.id }, '180d'), '180d')
+    if (wpSub) await this.storeWPSub(setCookie, wpSub)
+  }
+
+  public async storeWPSub(setCookie: ResolverCtx['setCookie'], sub: string) {
+    const { auth } = JSON.parse(sub)?.keys
+    if (typeof auth !== 'string' || !auth) throw Error('invalid token')
+    await db.notifications.put({ pk: `user#wp#${this.id}`, sk: auth, sub })
+    setCookie('wp_id', auth, '180d')
+  }
+
+  public static genID = () =>
+    crypto
+      .randomBytes(8)
+      .toString('base64')
+      .replace(/=*$/, '')
+      .replace(/\+/g, '_')
+      .replace(/\//g, '-')
 }

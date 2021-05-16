@@ -8,3 +8,5 @@ gen/
 /log.*
 /*.key*
 .npmrc
+docs
+output.json

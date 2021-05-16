@@ -1,17 +1,23 @@
 type User {
   id: ID!
-  authProvider: AuthProvider!
   subscriptions(known: [ID!]): Subscriptions!
   wpSubs: [ID!]!
   wsAuth: ID
   currentEpisode: EpisodePlayback
 }
 
-enum AuthProvider {
-  google
-}
-
 type Subscriptions {
   added: [Podcast!]!
   removed: [ID!]!
+}
+
+type SignInResult {
+  user: User
+  reason: FailedSigninReason
+}
+
+enum FailedSigninReason {
+  unknown_ident
+  duplicate_ident
+  incorrect_auth
 }

@@ -1,8 +1,8 @@
 import { ApolloServer, makeExecutableSchema } from 'apollo-server-lambda'
 import * as resolvers from './resolvers'
 import * as typeDefs from './schema'
-import { decode, cookie } from '~/auth'
-import { parseCookies, Headers } from '~/utils/http'
+import * as jwt from '~/auth/jwt'
+import { cookie, parseCookies, Headers } from '~/utils/http'
 
 export const requests: Record<
   string,
@@ -29,6 +29,7 @@ export const server = new ApolloServer({
         ;(requests[requestId].responseHeaders[header] ??= []).push(value)
       },
       setCookie(key, value, age) {
+        logger.info('set cookie', cookie(key, value, age))
         ;(requests[requestId].responseHeaders['Set-Cookie'] ??= []).push(
           cookie(key, value, age)
         )
@@ -43,11 +44,7 @@ export const server = new ApolloServer({
     }
 
     try {
-      if (cookies.auth) {
-        const jwt = decode(cookies.auth)
-        ctx.user = jwt.id
-        ctx.auth = jwt.auth
-      }
+      if (cookies.auth) ctx.user = jwt.decode(cookies.auth).sub as string
     } catch (jwtError) {
       logger.error("couldn't decode auth cookie", { jwtError, cookies })
       ctx.deleteCookie('auth')

@@ -1,6 +1,5 @@
 import * as db from '~/utils/db'
 import { PaginationArgs, flatten } from '~/utils/pagination'
-import { ddb } from '~/utils/aws'
 
 export default class Podcast {
   private constructor(
@@ -13,7 +12,7 @@ export default class Podcast {
     public readonly palette: any,
     public readonly episodeCount: number,
     public readonly description: string,
-    public readonly check: string
+    public readonly metaCheck: string
   ) {}
 
   public static async fetch(id: string): Promise<Podcast | undefined> {
@@ -32,12 +31,12 @@ export default class Podcast {
   ) {
     const selected = await db.podcasts
       .batchGet(...podcasts.map(({ id }) => id))
-      .select('id', 'check', 'episodeCheck')
+      .select('id', 'metaCheck', 'episodeCheck')
 
     const metaDiff = podcasts
       .filter(
         ({ id, meta }) =>
-          meta && selected.find(v => v.id === id)!.check !== meta
+          meta && selected.find(v => v.id === id)!.metaCheck !== meta
       )
       .map(({ id }) => id)
 
@@ -85,7 +84,7 @@ export default class Podcast {
       : undefined
 
     const fetch = async () => {
-      const { Items, LastEvaluatedKey } = await ddb
+      const { Items, LastEvaluatedKey } = await db.podcasts.client
         .query({
           TableName: 'echo_episodes',
           KeyConditionExpression: 'pId = :pId ',
@@ -138,7 +137,7 @@ export default class Podcast {
       data.palette,
       data.episodeCount,
       data.description,
-      (data as any).check
+      data.metaCheck
     )
   }
 }

@@ -39,6 +39,8 @@ provider:
     PUBLIC_KEY: ${ssm:/echo/api/PublicKey}
     PRIVATE_KEY: ${ssm:/echo/api/PrivateKey~true}
     PHOTON_URL: ${ssm:/echo/photon/url}
+    HASH_ARN: ${ssm:/echo/password/lambda/arn}
+    HASH_SECRET: ${ssm:/password/auth~true}
 
 functions:
   echo:
@@ -66,7 +68,7 @@ plugins:
 
 custom:
   serverless-offline:
-    port: 7000
+    httpPort: 7000
     noPrependStageInUrl: true
   webpack:
     webpackConfig: 'webpack.config.js'

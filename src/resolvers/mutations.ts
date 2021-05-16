@@ -1,12 +1,31 @@
 import { AuthenticationError, UserInputError } from 'apollo-server-lambda'
 import axios from 'axios'
-import { signInToken } from '~/auth'
 import Podcast from '~/models/podcast'
 import User from '~/models/user'
 import { S3 } from 'aws-sdk'
 import { parse as triggerParse } from '~/utils/parser'
 import * as db from '~/utils/db'
 import { sns } from '~/utils/aws'
+
+export const signIn: Mutation<{
+  ident: string
+  password: string
+}> = async (_, { ident, password }, { setCookie }) => {
+  const result = await User.signInPassword(ident, password)
+  if (!(result instanceof User)) return { reason: result }
+  await result.afterSignIn(setCookie)
+  return { user: result }
+}
+
+export const signUp: Mutation<{
+  ident: string
+  password: string
+}> = async (_, { ident, password }, { setCookie }) => {
+  const result = await User.signUpPassword(ident, password)
+  if (!(result instanceof User)) return { reason: result }
+  await result.afterSignIn(setCookie)
+  return { user: result }
+}
 
 export const signInGoogle: Mutation<{
   accessToken: string
@@ -23,10 +42,8 @@ export const signInGoogle: Mutation<{
     if (!data.sub)
       throw new AuthenticationError("couldn't get user id from google")
 
-    const user = await User.signIn(data.sub)
-    const jwt = signInToken(user.id, 'google')
-    setCookie('auth', jwt)
-    if (wpSub) setCookie('wp_id', await storeWPSub(user.id, wpSub))
+    const user = await User.signInGoogle(data.sub)
+    await user.afterSignIn(setCookie, wpSub)
 
     return { user, ...user, authProvider: 'google' }
   } catch (e) {
@@ -107,14 +124,9 @@ export const addWPSub: Mutation<{ sub: string }> = async (
   _,
   { sub },
   { user, setCookie }
-) => setCookie('wp_id', await storeWPSub(user, sub))
-
-async function storeWPSub(user: string, sub: string): Promise<string> {
+) => {
   if (!user) throw new AuthenticationError('must be signed in')
-  const { auth } = JSON.parse(sub)?.keys
-  if (typeof auth !== 'string' || !auth) throw Error('invalid token')
-  await db.notifications.put({ pk: `user#wp#${user}`, sk: auth, sub })
-  return auth
+  await new User(user).storeWPSub(setCookie, sub)
 }
 
 export const removeWPSub: Mutation<{ sub: string }> = async (
@@ -157,10 +169,5 @@ export const processCover: Mutation<{ podcast: string }> = async (
 ) => {
   const data = await db.podcasts.get(podcast)
   if (!data) throw new UserInputError(`unknown podcast ${podcast}`)
-  await sns
-    .publish({
-      Message: JSON.stringify({ podcast, url: data.artwork }),
-      TopicArn: process.env.RESIZE_SNS,
-    })
-    .promise()
+  await sns().resize.send({ podcast, url: data.artwork })
 }

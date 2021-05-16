@@ -6,7 +6,7 @@
     "baseUrl": ".",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["node"],
+    "types": ["node", "jest"],
     "resolveJsonModule": true,
     "allowJs": true,
     "experimentalDecorators": true,
@@ -27,5 +27,6 @@
     "webpack.config.js",
     "scripts",
     "commitlint.config.js"
-  ]
+  ],
+  "include": ["src"]
 }
