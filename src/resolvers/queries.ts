@@ -29,6 +29,13 @@ export const podcast: Query<{ id: string }> = async (_, { id }) => {
   return feed
 }
 
+export const podcasts: Query<{ ids: string[] }> = async (
+  _,
+  { ids },
+  ctx,
+  info
+) => await Promise.all(ids.map(id => podcast(_, { id }, ctx, info)))
+
 export const episode: Query<{ podId: string; epId: string }> = async (
   _,
   { podId, epId }
