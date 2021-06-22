@@ -73,7 +73,10 @@ export default class Podcast {
     opts: PaginationArgs
   ): Promise<[episodes: any[], pageInfo: Omit<PageInfo, 'episodeCount'>]> {
     const pageOpts = flatten(opts)
+    pageOpts.limit ??= Infinity
     const { direction, limit, cursor: cursorId } = pageOpts
+
+    logger.info({ pageOpts })
 
     const episodes: any[] = []
     let cursor: { pId: string; eId: string } = cursorId
