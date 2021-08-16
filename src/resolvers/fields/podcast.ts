@@ -10,13 +10,14 @@ export const id: Resolver<Parent> = ({ id }) =>
 export const feed: Resolver<Parent> = ({ url, feed }) => feed ?? url
 
 export const episodes: Resolver<Parent> = async (
-  { id, episodeCount },
+  { id, episodeCount, cursor = {} },
   args
 ) => {
   if (typeof id !== 'string') return
-  validate(args)
+  Object.assign(cursor, args)
+  validate(cursor)
 
-  const [episodes, info] = await Podcast.fetchEpisodes(id, args)
+  const [episodes, info] = await Podcast.fetchEpisodes(id, cursor)
   return {
     pageInfo: { ...info, total: episodeCount },
     edges: episodes.map(node => ({ node, cursor: node.eId })),

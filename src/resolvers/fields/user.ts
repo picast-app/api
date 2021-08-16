@@ -17,11 +17,13 @@ export const subscriptions: Resolver<User, { known?: string[] }> = async (
 export const wsAuth: Resolver<User, string> = ({ id }) =>
   jwt.sign({ wsUser: id }, '48h')
 
-export const currentEpisode: Resolver<User> = async ({ current }) =>
-  current && {
+export const currentEpisode: Resolver<User> = async ({ current }) => {
+  if (!current?.podcast || !current?.episode) return null
+  return {
     id: {
       podcast: current.podcast,
       episode: current.episode,
     },
     position: Math.floor(current.position),
   }
+}

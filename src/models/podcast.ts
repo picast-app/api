@@ -76,8 +76,6 @@ export default class Podcast {
     pageOpts.limit ??= Infinity
     const { direction, limit, cursor: cursorId } = pageOpts
 
-    logger.info({ pageOpts })
-
     const episodes: any[] = []
     let cursor: { pId: string; eId: string } = cursorId
       ? {
