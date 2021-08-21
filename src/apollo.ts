@@ -74,7 +74,7 @@ export const handler = server.createHandler({
   cors: {
     origin: process.env.IS_OFFLINE
       ? 'http://localhost:3000'
-      : 'https://picast.app',
+      : ['https://picast.app', 'https://staging.picast.app'],
     credentials: true,
   },
 })

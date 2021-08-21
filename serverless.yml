@@ -59,6 +59,7 @@ functions:
             origins:
               - http://localhost:3000
               - https://picast.app
+              - https://*.picast.app
             allowCredentials: true
       - http:
           path: /
@@ -67,6 +68,7 @@ functions:
             origins:
               - http://localhost:3000
               - https://picast.app
+              - https://*.picast.app
 
 plugins:
   - serverless-webpack
