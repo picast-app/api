@@ -12,7 +12,8 @@ export default class Podcast {
     public readonly palette: any,
     public readonly episodeCount: number,
     public readonly description: string,
-    public readonly check: string
+    public readonly check: string,
+    public readonly episodeCheck: string
   ) {}
 
   public static async fetch(id: string): Promise<Podcast | undefined> {
@@ -138,7 +139,8 @@ export default class Podcast {
       data.palette,
       data.episodeCount,
       data.description,
-      data.metaCheck
+      data.metaCheck,
+      data.episodeCheck
     )
   }
 }

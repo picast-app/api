@@ -8,6 +8,7 @@ type Podcast {
   palette: Palette
   feed: String!
   check: String
+  episodeCheck: String
   episodes(
     first: Int
     last: Int
