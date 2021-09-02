@@ -1,5 +1,5 @@
 import * as pi from '~/utils/podcastIndex'
-import { idToNumber } from '~/utils/id'
+import { idToNumber, numberToId } from '~/utils/id'
 import User from '~/models/user'
 import Podcast from '~/models/podcast'
 import * as db from '~/utils/db'
@@ -16,18 +16,33 @@ export const search = async (_, { query, limit }) => {
   return feeds
 }
 
-export const podcast: Query<{ id: string }> = async (_, { id }) => {
-  if (/[^\w]/.test(id)) throw new UserInputError(`invalid id ${id}`)
-
+async function fetchPodcast(id: string, piData?: any) {
+  logger.info({ id, piData })
   const podcast = await Podcast.fetch(id)
   if (podcast) return podcast
 
-  const { feed } = await pi.query('podcasts/byfeedid', { id: idToNumber(id) })
-  if (feed?.url) await parse({ id, feed: feed.url })
+  piData ??= (await pi.query('podcasts/byfeedid', { id: idToNumber(id) })).feed
+  if (piData?.url) await parse({ id, feed: piData.url })
   else throw new UserInputError(`unknown id ${id}`)
 
   return feed
 }
+
+export const podcast: Query<{ id: string }> = async (_, { id }) => {
+  if (/[^\w]/.test(id)) throw new UserInputError(`invalid id ${id}`)
+  return await fetchPodcast(id)
+}
+
+export const searchByFeed: Query<{ feeds: string[] }> = async (_, { feeds }) =>
+  await Promise.all(
+    (
+      await Promise.allSettled(
+        feeds.map(url => pi.query('podcasts/byfeedurl', { url }))
+      )
+    )
+      .flatMap(v => (v.status === 'fulfilled' ? [v.value.feed] : []))
+      .map(v => fetchPodcast(numberToId(v.id), v))
+  )
 
 export const podcasts: Query<{ ids: string[] }> = async (
   _,

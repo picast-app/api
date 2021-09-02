@@ -1,5 +1,6 @@
 type Query {
   search(query: String!, limit: Int = 10): [Podcast!]!
+  searchByFeed(feeds: [String!]): [Podcast!]!
   podcast(id: ID!): Podcast
   podcasts(ids: [ID!]!): [Podcast!]!
   episode(podId: ID!, epId: ID!): Episode
