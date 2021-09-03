@@ -17,7 +17,6 @@ export const search = async (_, { query, limit }) => {
 }
 
 async function fetchPodcast(id: string, piData?: any) {
-  logger.info({ id, piData })
   const podcast = await Podcast.fetch(id)
   if (podcast) return podcast
 
@@ -25,7 +24,7 @@ async function fetchPodcast(id: string, piData?: any) {
   if (piData?.url) await parse({ id, feed: piData.url })
   else throw new UserInputError(`unknown id ${id}`)
 
-  return feed
+  return piData
 }
 
 export const podcast: Query<{ id: string }> = async (_, { id }) => {
