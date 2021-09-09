@@ -34,11 +34,12 @@ export default class Podcast {
       .batchGet(...podcasts.map(({ id }) => id))
       .select('id', 'metaCheck', 'episodeCheck')
 
+    podcasts = podcasts.filter(({ id }) => selected.find(v => v.id === id))
+
     const metaDiff = podcasts
-      .filter(
-        ({ id, meta }) =>
-          meta && selected.find(v => v.id === id)!.metaCheck !== meta
-      )
+      .filter(({ id, meta }) => {
+        return meta && selected.find(v => v.id === id)!.metaCheck !== meta
+      })
       .map(({ id }) => id)
 
     const updatedMeta = metaDiff.length
@@ -56,7 +57,12 @@ export default class Podcast {
   }
 
   public static async episodeDiff(id: string, known: string[]) {
-    const { episodes } = await db.parser.get(`${id}#parser`)
+    const data = await db.parser.get(`${id}#parser`)
+    if (!data) {
+      logger.warn(`no parser record exists for ${id}`)
+      return null
+    }
+    const episodes = data.episodes ?? []
     const added = episodes
       .filter(id => !known.includes(id))
       .map(eId => [id, eId] as [string, string])

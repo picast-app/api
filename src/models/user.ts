@@ -4,12 +4,15 @@ import { lambda } from '~/utils/aws'
 import crypto from 'crypto'
 import * as jwt from '~/auth/jwt'
 
+// @ts-ignore
+type DBUser = DBRecord<typeof db['users']>
+
 export default class User {
   constructor(
     public readonly id: string,
     public readonly subscriptions: string[] | null = null,
     public readonly wpSubs: string[] = [],
-    public readonly current?: DBRecord<typeof db['users']>['current']
+    public readonly current?: DBUser['current']
   ) {}
 
   public static async signInPassword(

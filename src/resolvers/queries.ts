@@ -68,7 +68,7 @@ export const me = async (_, __, { user: userId, auth }) => {
   return {
     user,
     authProvider: auth,
-    ...user,
+    ...(user as any),
   }
 }
 
