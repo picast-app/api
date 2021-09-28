@@ -16,5 +16,6 @@ export default () => {
   return {
     resize: new Client(sns, process.env.RESIZE_SNS),
     parser: new Client(sns, process.env.PARSER_SNS),
+    notify: new Client(sns, process.env.NOTIFY_SNS),
   }
 }

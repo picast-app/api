@@ -1,6 +1,5 @@
 import User from '~/models/user'
 import Podcast from '~/models/podcast'
-import * as jwt from '~/auth/jwt'
 
 export const subscriptions: Resolver<User, { known?: string[] }> = async (
   { subscriptions },
@@ -13,9 +12,6 @@ export const subscriptions: Resolver<User, { known?: string[] }> = async (
     removed: known?.filter(id => !subscriptions?.includes(id)) ?? [],
   }
 }
-
-export const wsAuth: Resolver<User, string> = ({ id }) =>
-  jwt.sign({ wsUser: id }, '48h')
 
 export const currentEpisode: Resolver<User> = async ({ current }: any) => {
   if (!current?.podcast || !current?.episode) return null

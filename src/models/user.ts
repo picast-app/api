@@ -3,6 +3,7 @@ import type { DBRecord } from 'ddbjs'
 import { lambda } from '~/utils/aws'
 import crypto from 'crypto'
 import * as jwt from '~/auth/jwt'
+import { sns } from '~/utils/aws'
 
 // @ts-ignore
 type DBUser = DBRecord<typeof db['users']>
@@ -124,12 +125,23 @@ export default class User {
     await db.users.update(`user#${this.id}`).delete({ wpSubs: [id] })
   }
 
+  private _wsAuth?: string
+  public get wsAuth() {
+    return (this._wsAuth ??= jwt.sign({ wsUser: this.id }, '48h'))
+  }
+
   public async afterSignIn(
     setCookie: ResolverCtx['setCookie'],
     wpSub?: string
   ) {
     setCookie('auth', jwt.sign({ sub: this.id }, '180d'), '180d')
     if (wpSub) await this.storeWPSub(setCookie, wpSub)
+    if (this.subscriptions?.length)
+      await sns().notify.send({
+        type: 'PUSH_EPISODES',
+        userToken: this.wsAuth,
+        podcasts: this.subscriptions,
+      })
   }
 
   public async storeWPSub(setCookie: ResolverCtx['setCookie'], sub: string) {

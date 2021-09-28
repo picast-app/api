@@ -24,6 +24,7 @@ provider:
       Resource:
         - ${ssm:/echo/sns/parser/arn}
         - ${ssm:/echo/sns/resize/arn}
+        - ${ssm:/echo/sns/clientpush/arn}
     - Effect: Allow
       Action:
         - s3:*
@@ -39,6 +40,7 @@ provider:
     PI_API_SECRET: ${ssm:/echo/pi/secret~true}
     PARSER_SNS: ${ssm:/echo/sns/parser/arn}
     RESIZE_SNS: ${ssm:/echo/sns/resize/arn}
+    NOTIFY_SNS: ${ssm:/echo/sns/clientpush/arn}
     PARSER_AUTH: ${ssm:/parser/auth~true}
     GOOGLE_ID: ${ssm:/echo/google/id}
     GOOGLE_SECRET: ${ssm:/echo/google/secret~true}
@@ -77,6 +79,7 @@ plugins:
 custom:
   serverless-offline:
     httpPort: 7000
+    host: 0.0.0.0
     noPrependStageInUrl: true
   webpack:
     webpackConfig: 'webpack.config.js'

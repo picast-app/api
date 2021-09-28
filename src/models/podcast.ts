@@ -107,7 +107,7 @@ export default class Podcast {
       if (cursor && episodes.length < limit + 1) await fetch()
     }
 
-    await fetch()
+    if (limit > 0) await fetch()
 
     const pageInfo: PageInfo = {
       hasPreviousPage:
