@@ -45,7 +45,12 @@ export const signInGoogle: Mutation<{
     const user = await User.signInGoogle(data.sub)
     await user.afterSignIn(setCookie, wpSub)
 
-    return { user, ...(user as any), authProvider: 'google' }
+    return {
+      user,
+      ...(user as any),
+      wsAuth: user.wsAuth,
+      authProvider: 'google',
+    }
   } catch (e) {
     console.error(e)
     if (e.response.data.error === 'invalid_request')
