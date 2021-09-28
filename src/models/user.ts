@@ -127,7 +127,10 @@ export default class User {
 
   private _wsAuth?: string
   public get wsAuth() {
-    return (this._wsAuth ??= jwt.sign({ wsUser: this.id }, '48h'))
+    return (this._wsAuth ??= jwt.sign(
+      { wsUser: this.id, session: User.genID(4) },
+      '48h'
+    ))
   }
 
   public async afterSignIn(
@@ -151,9 +154,9 @@ export default class User {
     setCookie('wp_id', auth, '180d')
   }
 
-  public static genID = () =>
+  public static genID = (bytes = 8) =>
     crypto
-      .randomBytes(8)
+      .randomBytes(bytes)
       .toString('base64')
       .replace(/=*$/, '')
       .replace(/\+/g, '_')
